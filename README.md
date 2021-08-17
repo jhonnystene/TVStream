@@ -1,6 +1,9 @@
 # TVStream
 IPTV system that randomly selects episodes to play from disk.
 
+## Notes
+- Requires WEBM media.
+
 ## Setup
 1. Install requirements:  
     `npm install`
@@ -8,7 +11,6 @@ IPTV system that randomly selects episodes to play from disk.
 
 ## Known issues
 - Database is refreshed on every restart, erasing manual changes
-- Categories are not determined automatically, resulting in everything being in the "Misc." channel
 - Show names, episode names/numbers, and season numbers are ignored
 - Channel orders are regenerated on every refresh, rather than being consistent between users + refreshes
 - Probably has security issues, idk I don't like webdev

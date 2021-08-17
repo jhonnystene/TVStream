@@ -1,5 +1,5 @@
 /*
- * TVStream Server v1.0.0
+ * TVStream Server v1.0.1
  * Copyright (c) 2021 Johnny Stene <jhonnystene@protonmail.com>
  * 
  * This program is free software: you can redistribute it and/or modify  
@@ -18,6 +18,7 @@
 // TODO: Autoconvert
 // In the meantime use this command:
 // for f in *.mkv; do ffmpeg -i "$f" -c copy "${f%.mkv}.mp4"; done
+// Actually don't, FF breaks MP4 audio apparently
 
 const PORT = 8080;
 const SHOWDIR = "/home/johnny/movies-mnt/TV"; // Update this
@@ -39,35 +40,39 @@ function saveDatabase() {
 	});
 }
 
-function getRecursiveFiles(path) {
+function recursiveRefreshDatabase(path, category) {
+	var realCategory = category;
+	console.log(`Loading ${path} into database...`);
 	var files = fs.readdirSync(path);
-	var result = [];
-	console.log(`Scanning directory ${path}...`);
+
+	if(files.indexOf("meta.json")) {
+		var meta = jsonfile.readFileSync(path + "/meta.json");
+		realCategory = meta["category"];
+		console.log(`Found new category for directory: ${realCategory}`)
+	}
+
 	for(var i = 0; i < files.length; i++) {
 		var file = files[i];
-		var realFilepath = path + "/" + file;
-		if(fs.lstatSync(realFilepath).isDirectory()) {
-			result = result.concat(getRecursiveFiles(realFilepath));
+		var realFilePath = path + "/" + file;
+		if(fs.lstatSync(realFilePath).isDirectory()) {
+			recursiveRefreshDatabase(realFilePath, realCategory);
 		} else {
-			result.push(realFilepath);
+			if(file.endsWith("webm") || file.endsWith("mp4")) {
+				var fileObject = {}
+				fileObject["path"] = realFilePath;
+				fileObject["category"] = realCategory;
+				database[Object.keys(database).length] = fileObject;
+			}
 		}
 	}
-	return result;
 }
 
 function refreshDatabase() {
 	console.log(`Rebuilding database (from ${SHOWDIR})...`);
-	var files = getRecursiveFiles(SHOWDIR);
-	console.log(`Found ${files.length} files.`);
 	database = {};
-	for(var i = 0; i < files.length; i++) {
-		var fileObject = {}
-		fileObject["path"] = files[i];
-		fileObject["category"] = "Misc."; // TODO: Get this from directory
-		// TODO: Series name, season, episode number, episode name
-		database[i] = fileObject;
-	}
+	recursiveRefreshDatabase(SHOWDIR, "Misc.");
 	console.log("Rebuilt database.");
+	console.log(JSON.stringify(database));
 	saveDatabase();
 }
 

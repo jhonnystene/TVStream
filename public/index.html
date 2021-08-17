@@ -9,8 +9,9 @@
 		<div class="header">
 			<h1>TVStream</h1>
 		</div>
-		<video id="video" controls>
-			<source id="videoStream" src="" type="video/mp4">
+		<video id="video" controls unmute>
+			<source id="videoStream" src="" type="video/webm">
+			<source id="videoStream2" src="" type="video/webm">
 			Your browser does not support the video tag or the file is unsupported.
 		</video>
 		<br>
@@ -23,7 +24,7 @@
 			<button onclick="changeChannel()">Change</button>
 		</div>
 
-		<p id="version">Version 1.0.0</p>
+		<p id="version">Version 1.0.1</p>
 
 		<script>
 			const rootURL = window.location.href.split("/");
@@ -54,8 +55,11 @@
 
 			function playVideo(id) {
 				var videoStream = document.getElementById("videoStream");
+				var videoStream2 = document.getElementById("videoStream2");
 				var video = document.getElementById("video");
 				videoStream.setAttribute("src", `/stream/${id}`);
+				videoStream2.setAttribute("src", `/stream/${id}`);
+				video.volume = 1;
 				video.load();
 			}
 
