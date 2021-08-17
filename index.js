@@ -45,7 +45,7 @@ function recursiveRefreshDatabase(path, category) {
 	console.log(`Loading ${path} into database...`);
 	var files = fs.readdirSync(path);
 
-	if(files.indexOf("meta.json")) {
+	if(files.indexOf("meta.json") != -1) {
 		var meta = jsonfile.readFileSync(path + "/meta.json");
 		realCategory = meta["category"];
 		console.log(`Found new category for directory: ${realCategory}`)

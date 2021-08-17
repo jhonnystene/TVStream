@@ -17,5 +17,6 @@ IPTV system that randomly selects episodes to play from disk.
 
 ## Todo
 - Fix all known issues
+- Add support for multiple categories for folders
 - Add TV guide that displays show names and timelines for every channel
 - Refresh channel list rather than looping when finishing channel
