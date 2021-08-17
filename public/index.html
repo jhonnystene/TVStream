@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>TVStream</title>
+		<link href="/global.css" rel="stylesheet" type="text/css" />
+	</head>
+
+	<body>
+		<div class="header">
+			<h1>TVStream</h1>
+		</div>
+		<video id="video" controls>
+			<source id="videoStream" src="" type="video/mp4">
+			Your browser does not support the video tag or the file is unsupported.
+		</video>
+		<br>
+
+		<div class="channelList">
+			<h3>Channel:</h3>
+			<select name="channel" id="channelSelector">
+
+			</select><br>
+			<button onclick="changeChannel()">Change</button>
+		</div>
+
+		<p id="version">Version 1.0.0</p>
+
+		<script>
+			const rootURL = window.location.href.split("/");
+			const url = rootURL[0] + rootURL[1];
+			var currentChannel = ["1"];
+			var currentShow
+
+			function httpGet(theUrl) {
+				var xmlHttp = new XMLHttpRequest();
+				xmlHttp.open( "GET", theUrl, false ); // false for synchronous request
+				xmlHttp.send( null );
+				return xmlHttp.responseText;
+			}
+
+			function getCategories() {
+				var categoryResponse = httpGet(`${url}/categories`);
+				return JSON.parse(categoryResponse);
+			}
+
+			function getChannelForCategory(category) {
+				var channelResponse = httpGet(`${url}/channel/${category}`);
+				return JSON.parse(channelResponse);
+			}
+
+			function getVideo(id) {
+				return `${url}/stream/${id}`;
+			}
+
+			function playVideo(id) {
+				var videoStream = document.getElementById("videoStream");
+				var video = document.getElementById("video");
+				videoStream.setAttribute("src", `/stream/${id}`);
+				video.load();
+			}
+
+			function updateChannelList() {
+				var channelList = document.getElementById("channelSelector");
+				channelList.innerHTML = "";
+				var channels = getCategories();
+				for(var i = 0; i < channels.length; i++) {
+					channelList.innerHTML = channelList.innerHTML + `<option value="${channels[i]}">The ${channels[i]} Channel</option>`;
+				}
+			}
+
+			function changeChannel() {
+				var channel = document.getElementById("channelSelector").value;
+				console.log(`Changing to channel ${channel}`);
+				currentChannel = getChannelForCategory(channel);
+				currentShow = -1;
+				changeShow();
+			}
+
+			function changeShow() {
+				currentShow ++;
+				if(currentShow == currentChannel.length) currentShow = 0;
+				playVideo(currentChannel[currentShow]);
+			}
+
+			function checkShow() {
+				if(document.getElementById("video").duration == 0) return;
+				if(document.getElementById("video").ended) changeShow();
+			}
+
+			setInterval(checkShow, 1000);
+			updateChannelList();
+		</script>
+	</body>
+</html>
